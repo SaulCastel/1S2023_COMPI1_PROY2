@@ -1,7 +1,3 @@
-/**
- * Ejemplo mi primer proyecto con Jison utilizando Nodejs en Ubuntu
- */
-
 /* Definición Léxica */
 %lex
 
@@ -27,6 +23,19 @@ STRING					\".|{ESCAPE}\"
 "true"					return "TRUE"
 "false"					return "FALSE"
 "new"						return "NEW"
+"if"						return "IF"
+"else"					return "ELSE"
+"switch"				return "SWITCH"
+"case"					return "CASE"
+"default"				return "DEFAULT"
+"while"					return "WHILE"
+"for"						return "FOR"
+"do"						return "DO"
+"break"					return "BREAK"
+"continue"			return "CONTINUE"
+"return"				return "RETURN"
+"void"					return "VOID"
+"main"					return "MAIN"
 {ID}						return "ID"
 "+"							return "SUM"
 "-"							return "NEG"
@@ -59,8 +68,8 @@ STRING					\".|{ESCAPE}\"
 {CHAR}					return "CHAR"
 {STRING}				return "STRING"
 
-<<EOF>>                 return 'EOF';
-.                       { console.error('Este es un error léxico: ' + yytext + ', en la linea: ' + yylloc.first_line + ', en la columna: ' + yylloc.first_column); }
+<<EOF>>         return 'EOF';
+.               { console.error('Este es un error léxico: ' + yytext + ', en la linea: ' + yylloc.first_line + ', en la columna: ' + yylloc.first_column); }
 /lex
 
 /* Asociación de operadores y precedencia */
