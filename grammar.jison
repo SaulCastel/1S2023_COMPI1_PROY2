@@ -36,6 +36,7 @@ STRING					\".|{ESCAPE}\"
 "return"				return "RETURN"
 "void"					return "VOID"
 "main"					return "MAIN"
+"print"					return "PRINT"
 {ID}						return "ID"
 "+"							return "SUM"
 "-"							return "NEG"
@@ -73,38 +74,122 @@ STRING					\".|{ESCAPE}\"
 /lex
 
 /* Asociación de operadores y precedencia */
+%left POWER
+%left DIV, MULT
+%left SUM, NEG
+%left EQUALS, NOT_EQUALS, LESS_THAN, LESS_EQUAL_THAN, GREATER_THAN, GREATER_EQUAL_THAN
+%left NOT
+%left AND
+%left OR
 
-%left 'MAS' 'MENOS'
-%left 'POR' 'DIVIDIDO'
-%left UMENOS
-
-%start ini
+%start init
 
 %% /* Definición de la gramática */
 
-ini
-	: instrucciones EOF
+init
+	: instructions EOF
 ;
 
-instrucciones
-	: instruccion instrucciones
-	| instruccion
+instructions
+	:	instructions instruction	
+	| instruction
+;
+
+instruction
+	:	expressions
+	| statements
+;
+
+expressions
+	: arithmethic-expression
+	| unary-expression
+	| ternary-expression
+	| logical-expression
+	| relational-expression
+	| group-expression
+	| function-call
+	| type-casting
+	| increment
+	| decrement
 	| error { console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column); }
 ;
 
-instruccion
-	: REVALUAR CORIZQ expresion CORDER PTCOMA {
-		console.log('El valor de la expresión es: ' + $3);
-	}
+arithmethic-expression
+	:	expressions SUM expressions
+	| expressions NEG expressions
+	| expressions MULT expressions
+	| expressions DIV expressions
+	| expressions POWER expressions
+	| expressions MOD expressions
 ;
 
-expresion
-	: MENOS expresion %prec UMENOS  { $$ = $2 *-1; }
-	| expresion MAS expresion       { $$ = $1 + $3; }
-	| expresion MENOS expresion     { $$ = $1 - $3; }
-	| expresion POR expresion       { $$ = $1 * $3; }
-	| expresion DIVIDIDO expresion  { $$ = $1 / $3; }
-	| ENTERO                        { $$ = Number($1); }
-	| DECIMAL                       { $$ = Number($1); }
-	| PARIZQ expresion PARDER       { $$ = $2; }
+unary-expression
+	: NEG expressions
+	| expressions SUM SUM
+	| expressions NEG NEG
+;
+
+ternary-expression
+	:	expressions TERNARY TRUE COLON FALSE
+;
+
+logical-expression
+	:	expressions OR expressions
+	:	expressions AND expressions
+	:	NOT expressions
+;
+
+relational-expresion
+	:	expresssions EQUALS expressions
+	|	expresssions NOT_EQUALS expressions
+	|	expresssions LESS_THAN expressions
+	|	expresssions LESS_EQUAL_THAN expressions
+	|	expresssions GREATER_THAN expressions
+	|	expresssions GREATER_EQUAL_THAN expressions
+;
+
+group-expresion
+	: LPAREN expressions RPAREN
+;
+
+function-call
+	:	PRINT LPAREN arguments RPAREN
+	| ID LPAREN arguments RPAREN
+;
+
+arguments
+	: arguments COMMA expressions
+	| expressions
+;
+
+type-casting
+	: LPAREN native-type RPAREN expressions
+;
+
+statements
+	: inline-statement
+	| block-statement
+;
+
+inline-statement
+	: variable-statement SEMICOLON
+	| function-call SEMICOLON
+	| unary-expression SEMICOLON
+;
+
+variable-statement
+	: native-type ID
+	| native-type ID ASSIGN expressions
+;
+
+native-type
+	:	INT_TYPE
+	| STRING_TYPE
+	| DOUBLE_TYPE
+	| CHAR_TYPE
+	| BOOLEAN_TYPE
+;
+
+block-statement
+	: 
 ;
